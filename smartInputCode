@@ -1,0 +1,79 @@
+//SmartInput
+
+const smartInput = (event, fieldIndex, fields) => {
+			const controlKeys = [
+				'Tab',
+				'Shift',
+				'Backspace',
+				'Delete',
+				'ArrowLeft',
+				'ArrowRight',
+				'ArrowUp',
+				'ArrowDown',
+			];
+			const isControlKey = controlKeys.includes(event.key);
+			if (!isControlKey){
+				if(fieldIndex <= 3) {
+					if(/^\d$/.test(event.key)){
+						if (appState.cardDigits[fieldIndex] === undefined){
+							appState.cardDigits[fieldIndex] = [];
+						}
+					let field = fields[fieldIndex];
+					//appState
+					event.preventDefault();
+					const target = event.target;
+					let {
+						selectionStart,
+						value
+						} = target;
+						appState.cardDigits[fieldIndex][selectionStart] = +event.key;
+						target.value=value.substr(0, selectionStart) + event.key + value.substr(selectionStart + 1);
+						setTimeout (() => {
+							//console.log(appState.cardDigits)
+
+							appState.cardDigits[fieldIndex] = target.value.split('')
+							.map((car,i) => (car >='0' && car <='9') ? Number(car) : Number(appState.cardDigits[fieldIndex][i]));
+							if (fieldIndex < 3) {
+								target.value = target.value.replace(/\d/g, '$');
+							}
+							smartCursor(event, fieldIndex, fields);
+							
+							if (fieldIndex == 0 && target.value.length >=4) {
+								let first4Digits = appState.cardDigits[0];
+
+								detectCardType(first4Digits);
+							}
+						}, 500)
+					} else {
+						event.preventDefault();
+					}
+				} else if (fieldIndex == 4) {
+					if (/[a-z]|\s/i.test(event.key)) {
+						setTimeout( () => {
+							smartCursor(event, fieldIndex, fields);
+						}, 500);
+					} else { 
+						event.preventDefault();
+					}
+				} else {
+					if (/\d|\//.test(event.key)) {
+						setTimeout( () => {
+							smartCursor(event, fieldIndex, fields);
+						}, 500);
+					} else {
+						event.preventDefault();
+					} 
+				}
+			} else {
+				if (event.key === 'Backspace') {
+					if (appState.cardDigits[fieldIndex].length > 0) {
+						appState.cardDigits[fieldIndex].splice(-1, 1)
+					} else {}
+					smartBackSpace(event, fieldIndex, fields)
+				} else if (event.key == "Delete") {
+					if (appState.cardDigits[fieldIndex].length > 0) {
+						appState.cardDigits[fieldIndex].splice(1, 1)
+					}
+				}
+			}
+		}		 
